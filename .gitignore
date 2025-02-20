@@ -1,0 +1,35 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Ignore all puml files
+*.puml
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# ignore folder created by Goland
+.idea/
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# remove pyc files
+__pycache__/
+*.pyc
+
+# Environments
+.env
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+.vscode/
