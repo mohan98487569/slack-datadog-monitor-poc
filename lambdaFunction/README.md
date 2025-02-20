@@ -15,7 +15,7 @@ The function is deployed using Terraform.
 ```
 cd lambdaFunction
 go mod tidy
-go build -o main main.go
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bootstrap main.go
 zip function.zip main
 
 cd ../terraform/application/
