@@ -1,0 +1,18 @@
+{
+  "Statement": [
+    {
+      "Sid": "S3UploadPolicy",
+      "Effect": "Allow",
+      "Action": [
+        "kinesis:DescribeStream",
+        "kinesis:GetShardIterator",
+        "kinesis:GetRecords",
+        "kinesis:ListShards"
+      ],
+      "Resource": [
+        "${KINESIS_FIREHOSE_ARN}"
+      ]
+    }
+  ],
+  "Version": "2012-10-17"
+}
