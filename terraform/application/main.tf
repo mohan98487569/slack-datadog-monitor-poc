@@ -7,6 +7,7 @@ provider "aws" {
 provider "datadog" {
   api_key = var.my_datadog_api_key
   app_key = var.my_datadog_app_key
+  api_url = "https://api.us5.datadoghq.com/"
 }
 
 terraform {

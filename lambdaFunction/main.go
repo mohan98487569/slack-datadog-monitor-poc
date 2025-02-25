@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"lambda_function/service"
 	"net/http"
+	"strings"
 )
 
 func main() {
@@ -31,7 +32,7 @@ func handler(ctx context.Context, eventData events.APIGatewayV2HTTPRequest) (eve
 
 	fmt.Printf("slackEvent: %+v \n", slackEvent)
 
-	if slackEvent.Event.ThreadTS != "" && (slackEvent.Event.Text == "acknowledged" || slackEvent.Event.Text == "resolved") {
+	if slackEvent.Event.ThreadTS != "" && (strings.Contains(slackEvent.Event.Text, "acknowledged") || strings.Contains(slackEvent.Event.Text, "resolved")) {
 		err := service.ProcessMessage(slackEvent)
 		if err != nil {
 			fmt.Errorf("Processing message failed %v", err)

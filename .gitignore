@@ -8,6 +8,10 @@
 # Test binary, built with `go test -c`
 *.test
 
+# Ignore all .terraform files
+*.terraform/
+*.terraform
+
 # Ignore all puml files
 *.puml
 

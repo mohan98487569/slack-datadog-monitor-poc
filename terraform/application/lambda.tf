@@ -10,7 +10,8 @@ resource "aws_lambda_function" "datadog_monitor_request_sns_lambda" {
   environment {
     variables = {
       DATADOG_API_KEY = var.my_datadog_api_key,
-      DATADOG_APP_KEY = var.my_datadog_app_key
+      DATADOG_APP_KEY = var.my_datadog_app_key,
+      SLACK_TOKEN=var.my_slack_token
     }
   }
 }
