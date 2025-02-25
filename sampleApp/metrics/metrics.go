@@ -40,32 +40,9 @@ func (m *Metrics) Publish() {
 	log.Info("publishing metrics")
 
 	for {
+		//  send Counter1 as 0
+		fmt.Println("publishing counter1 metric as 0")
 		_, err := m.service.PutMetricData(&cloudwatch.PutMetricDataInput{
-			Namespace: aws.String(namespace),
-			MetricData: []*cloudwatch.MetricDatum{
-				{
-					MetricName: aws.String("Count"),
-					Unit:       aws.String(cloudwatch.StandardUnitCount),
-					Value:      aws.Float64(float64(m.counter1)),
-					Dimensions: []*cloudwatch.Dimension{
-						{
-							Name:  aws.String("type"),
-							Value: aws.String("Counter1"),
-						},
-					},
-				},
-			},
-		})
-		if err != nil {
-			log.Errorf("Could not publish metrics: %s", err)
-		} else {
-			log.Infof("Successfully published metric counter1 = %d.\n", m.counter1)
-		}
-
-		// after 5 mins, send Counter1 as 0
-		log.Info("Sleep for 5 mins")
-		time.Sleep(5 * time.Minute)
-		_, err = m.service.PutMetricData(&cloudwatch.PutMetricDataInput{
 			Namespace: aws.String(namespace),
 			MetricData: []*cloudwatch.MetricDatum{
 				{
@@ -86,5 +63,33 @@ func (m *Metrics) Publish() {
 		} else {
 			log.Infof("Successfully published metric counter1 = %d.\n", 0)
 		}
+
+		// after 5 mins, send Counter1 as 2
+		log.Info("Sleep for 5 mins")
+		time.Sleep(5 * time.Minute)
+		fmt.Println("publishing counter1 metric as 2")
+		_, err = m.service.PutMetricData(&cloudwatch.PutMetricDataInput{
+			Namespace: aws.String(namespace),
+			MetricData: []*cloudwatch.MetricDatum{
+				{
+					MetricName: aws.String("Count"),
+					Unit:       aws.String(cloudwatch.StandardUnitCount),
+					Value:      aws.Float64(float64(m.counter1)),
+					Dimensions: []*cloudwatch.Dimension{
+						{
+							Name:  aws.String("type"),
+							Value: aws.String("Counter1"),
+						},
+					},
+				},
+			},
+		})
+		if err != nil {
+			log.Errorf("Could not publish metrics: %s", err)
+		} else {
+			log.Infof("Successfully published metric counter1 = %d.\n", m.counter1)
+		}
+		log.Info("Sleep for 5 mins")
+		time.Sleep(5 * time.Minute)
 	}
 }

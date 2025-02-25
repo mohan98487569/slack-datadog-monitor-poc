@@ -2,7 +2,9 @@ package service
 
 import (
 	"fmt"
-	"lambda_function/api"
+	"lambda_function/datadog"
+	"lambda_function/slack"
+	"strings"
 	"time"
 )
 
@@ -14,6 +16,7 @@ type SlackEvent struct {
 		Timestamp string `json:"ts"`
 		Text      string `json:"text"`
 		ThreadTS  string `json:"thread_ts"`
+		Channel   string `json:"channel"`
 		Metadata  struct {
 			EventType    string `json:"event_type"`
 			EventPayload struct {
@@ -31,12 +34,21 @@ type SlackEvent struct {
 func ProcessMessage(slackEvent SlackEvent) error {
 	fmt.Println("Processing message: ")
 
-	datadogClient := api.NewDatadogClient()
-	/*
-		ToDo: Retrieve datadog monitor_id from datadog alert received in slack channel
-	*/
-	monitorID := 164327389 // for testing, hardcoding the datadog monitor_id
-	if slackEvent.Event.Text == "acknowledged" {
+	datadogClient := datadog.NewDatadogClient()
+	slackClient := slack.NewSlackClient()
+	message, err := slackClient.FetchThreadsFirstMessage(slackEvent.Event.Channel, slackEvent.Event.ThreadTS)
+	if err != nil {
+		return err
+	}
+	monitorID, err := slack.ExtractMonitorID(message.Attachments[0].TitleLink)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("monitorID: ", monitorID)
+
+	// monitorID := "1295108" // for testing, hardcoding the api monitor_id
+	if strings.Contains(slackEvent.Event.Text, "acknowledged") {
 		monitorData, err := datadogClient.MonitorCurrentState(monitorID)
 		if err != nil {
 			return err

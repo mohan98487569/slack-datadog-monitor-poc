@@ -14,3 +14,8 @@ variable "my_datadog_app_key" {
   default   = "testappkey"
 }
 
+variable "my_slack_token" {
+  type      = string
+  sensitive = true
+  default   = "test"
+}
