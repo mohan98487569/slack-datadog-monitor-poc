@@ -65,8 +65,8 @@ func (m *Metrics) Publish() {
 		}
 
 		// after 5 mins, send Counter1 as 2
-		log.Info("Sleep for 5 mins")
-		time.Sleep(5 * time.Minute)
+		log.Info("Sleep for 6 mins")
+		time.Sleep(6 * time.Minute)
 		fmt.Println("publishing counter1 metric as 2")
 		_, err = m.service.PutMetricData(&cloudwatch.PutMetricDataInput{
 			Namespace: aws.String(namespace),
@@ -89,7 +89,7 @@ func (m *Metrics) Publish() {
 		} else {
 			log.Infof("Successfully published metric counter1 = %d.\n", m.counter1)
 		}
-		log.Info("Sleep for 5 mins")
-		time.Sleep(5 * time.Minute)
+		log.Info("Sleep for 6 mins")
+		time.Sleep(6 * time.Minute)
 	}
 }
