@@ -47,7 +47,6 @@ func ProcessMessage(slackEvent SlackEvent) error {
 
 	fmt.Println("monitorID: ", monitorID)
 
-	// monitorID := "1295108" // for testing, hardcoding the api monitor_id
 	if strings.Contains(slackEvent.Event.Text, "acknowledged") {
 		monitorData, err := datadogClient.MonitorCurrentState(monitorID)
 		if err != nil {
@@ -59,6 +58,18 @@ func ProcessMessage(slackEvent SlackEvent) error {
 			if err != nil {
 				return err
 			}
+		}
+
+		investigationHeader := fmt.Sprintf("*%s dt-alerts Investigations:*", time.Now().Weekday()) // for testing
+		threadTS, err := slackClient.GetBotMessageTimestamp(slackEvent.Event.Channel, message.User, investigationHeader)
+		if err != nil {
+			return err
+		}
+
+		investigationUpdate := fmt.Sprintf("<@%s> is working on *<https://%s.slack.com/archives/%s/p%s|%s>*", slackEvent.Event.User, "demodmn", slackEvent.Event.Channel, strings.ReplaceAll(message.Timestamp, ".", ""), message.Attachments[0].Title)
+		_, err = slackClient.SendMessage(slackEvent.Event.Channel, investigationUpdate, threadTS)
+		if err != nil {
+			return fmt.Errorf("failed to send message to Slack dt-alerts Investigations thread: %w", err)
 		}
 
 	} else {
