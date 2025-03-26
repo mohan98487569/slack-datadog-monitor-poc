@@ -66,7 +66,7 @@ func ProcessMessage(slackEvent SlackEvent) error {
 			return err
 		}
 
-		investigationUpdate := fmt.Sprintf("<@%s> is working on %s.\n<https://%s.slack.com/archives/%s/p%s>", slackEvent.Event.User, message.Attachments[0].Title, "demodmn", slackEvent.Event.Channel, strings.ReplaceAll(message.Timestamp, ".", ""))
+		investigationUpdate := fmt.Sprintf("<@%s> is working on *<https://%s.slack.com/archives/%s/p%s|%s>*", slackEvent.Event.User, "demodmn", slackEvent.Event.Channel, strings.ReplaceAll(message.Timestamp, ".", ""), message.Attachments[0].Title)
 		_, err = slackClient.SendMessage(slackEvent.Event.Channel, investigationUpdate, threadTS)
 		if err != nil {
 			return fmt.Errorf("failed to send message to Slack dt-alerts Investigations thread: %w", err)

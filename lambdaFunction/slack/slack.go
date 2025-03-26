@@ -50,14 +50,7 @@ type SlackMessages struct {
 func (s *SlackClient) FetchThreadsFirstMessage(channel, threadTS string) (*Message, error) {
 	url := fmt.Sprintf("%s/conversations.replies?channel=%s&ts=%s", s.BaseURL, channel, threadTS)
 
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+s.Token)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := s.Client.Do(req)
+	resp, err := s.makeSlackRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -121,42 +114,28 @@ func (s *SlackClient) SendMessage(channelID, message, threadTS string) (*PostMes
 		}
 	}
 
-	jsonData, err := json.Marshal(payload)
+	resp, err := s.makeSlackRequest("POST", url, payload)
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", "Bearer "+s.Token)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := s.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	//body, err := io.ReadAll(resp.Body)
-	//if err != nil {
-	//	fmt.Println("error reading response body: ", err)
-	//}
-	//fmt.Println("body: ", string(body))
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to send message to Slack, status code: %d", resp.StatusCode)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("error reading response body: ", err)
 	}
-	fmt.Println("Successfully sent slack new message: ", message)
+	//fmt.Println("body: ", string(body))
 
 	var postResp PostMessageResponse
-	if err := json.NewDecoder(resp.Body).Decode(&postResp); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal slack post message response: %v", err)
+	if err := json.Unmarshal(body, &postResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal Slack  post message response: %w", err)
 	}
 
 	if !postResp.OK {
 		return nil, fmt.Errorf("slack API error: %s", postResp.Error)
 	}
+
+	fmt.Println("Successfully sent slack new message: ", message)
 
 	return &postResp, nil
 }
@@ -169,13 +148,7 @@ func (s *SlackClient) GetBotMessageTimestamp(channelID, userID, text string) (st
 	// Build API request URL
 	url := fmt.Sprintf("%s/conversations.history?channel=%s&oldest=%d&limit=100", s.BaseURL, channelID, startOfDay)
 
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return "", err
-	}
-	req.Header.Set("Authorization", "Bearer "+s.Token)
-
-	resp, err := s.Client.Do(req)
+	resp, err := s.makeSlackRequest("GET", url, nil)
 	if err != nil {
 		return "", err
 	}
@@ -210,4 +183,33 @@ func (s *SlackClient) GetBotMessageTimestamp(channelID, userID, text string) (st
 	fmt.Println("postMesgResp.Timestamp: ", postMesgResp.Timestamp)
 
 	return postMesgResp.Timestamp, nil
+}
+
+func (s *SlackClient) makeSlackRequest(method, url string, payload map[string]interface{}) (*http.Response, error) {
+	var reqBody io.Reader
+	if payload != nil {
+		jsonData, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+		reqBody = bytes.NewBuffer(jsonData)
+	}
+
+	req, err := http.NewRequest(method, url, reqBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", "Bearer "+s.Token)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := s.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Slack API error: %d", resp.StatusCode)
+	}
+
+	return resp, nil
 }
